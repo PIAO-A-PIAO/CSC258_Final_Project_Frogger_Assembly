@@ -454,134 +454,134 @@
 		sw $t1, 0($t3)
 		addi $t2, $t2, 4
 		j paintLogsLoop
-		
+
 	paintLogsEnd:
 		jr $ra
-	
+
 ####################### Draw Cars ######################
 	drawCars:
 		addi $sp, $sp, -4
 		sw $ra, 0($sp)
-		
+
 		jal saveCars
 		jal paintCars
-		
+
 		lw $ra, 0($sp)
 		addi $sp, $sp, 4
-		
+
 		jr $ra
-		
+
 ################ Save Cars #####################
-	
+
 	saveCars:
 		addi $t0, $zero, 10804
 		add $t1, $zero, $zero
 		add $t2, $zero, $zero
 		add $t3, $zero, $zero
 		add $t4, $zero, $zero
-		
+
 		addi $sp, $sp, -4
 		sw $ra, 0($sp)
-		
+
 		jal saveCarsRow 	#First car of line 1
-		
+
 		addi $t0, $t0, 24
 		jal saveCarsRow
-		
+
 		addi $t0, $t0, 44
 		jal saveCarsRow
-		
+
 		addi $t0, $t0, 32
 		jal saveCarsRow
-		
+
 		addi $t0, $zero, 13340
 		jal saveCarsRow
-		
+
 		addi $t0, $t0, 48
 		jal saveCarsRow
-		
+
 		addi $t0, $t0, 72
 		jal saveCarsRow
-		
+
 		lw $ra, 0($sp)
 		addi $sp, $sp, 4
-		
+
 		jr $ra
-	
+
 	saveCarsRow:
 		beq $t1, 2, saveCarsHeadEnd
 	saveCarsHeadColLoop:
 		beq $t2, 4, saveCarsHeadColEnd
 		sw $t0, carShape($t4)
-		
+
 		addi $t4, $t4, 4
 		addi $t2, $t2, 1
 		addi $t0, $t0, 256
 		j saveCarsHeadColLoop
-		
+
 	saveCarsHeadColEnd:
 		addi $t0, $t0, -1020
 		add $t2, $zero, $zero
 		addi $t1, $t1, 1
 		j saveCarsRow
-		
+
 	saveCarsHeadEnd:
 		addi $t0, $t0 256
 		sw $t0, carShape($t4)
-		
+
 		addi $t4, $t4, 4
-		
+
 		addi $t0, $t0, 256
 		sw $t0, carShape($t4)
 		addi $t4, $t4, 4
-		
-		addi $t0, $t0, -508		
+
+		addi $t0, $t0, -508
 
 	saveCarsTailLoop:
 		beq $t1, 5, saveCarsEnd
 	saveCarsTailColLoop:
 		beq $t2, 4, saveCarsTailColEnd
 		sw $t0, carShape($t4)
-		
-		
+
+
 		addi $t4, $t4, 4
 		addi $t2, $t2, 1
 		addi $t0, $t0, 256
 		j saveCarsTailColLoop
-		
+
 	saveCarsTailColEnd:
 		addi $t0, $t0, -1020
 		add $t2, $zero, $zero
 		addi $t1, $t1, 1
 		j saveCarsTailLoop
-	
+
 	saveCarsEnd:
 		add $t1, $zero, $zero
 		jr $ra
-		
-		
+
+
 ################ Paint Cars ######################
-	
+
 	paintCars:
 		lw $t0, basePoint
 		lw $t1, carColor
 		add $t2, $zero, $zero
 		add $t3, $zero, $zero
 		add $t4, $zero, $zero
-		
+
 		addi $sp, $sp, -4
 		sw $ra, 0($sp)
-		
-		jal paintCarsLoop	
-		
+
+		jal paintCarsLoop
+
 		lw $ra, 0($sp)
 		addi $sp, $sp, 4
-		
+
 		jr $ra
-	
+
 	paintCarsLoop:
 		beq $t2, 7, paintCarsEnd
-		
+
 	paintSingleCar:
 		beq $t3, 88, paintSingleCarEnd
 		lw $t5, carShape($t4)
@@ -591,59 +591,59 @@
 		addi $t3, $t3, 4
 		addi $t4, $t4, 4
 		j paintCarsLoop
-	
+
 	paintSingleCarEnd:
-		
+
 		addi $t2, $t2, 1
 		add $t3, $zero, $zero
 		j paintCarsLoop
-		
+
 	paintCarsEnd:
 		jr $ra
 
 
-		
+
 #################### Draw Turtles ####################
 	drawTurs:
 		addi $sp, $sp, -4
 		sw $ra, 0($sp)
-		
+
 		jal saveTurs
 		jal paintTurs
-		
+
 		lw $ra, 0($sp)
 		addi $sp, $sp, 4
-		
+
 		jr $ra
-		
-################### Save Turtles #################		
+
+################### Save Turtles #################
 	saveTurs:
 		addi $t0, $zero, 4624
 		add $t1, $zero, $zero
 		add $t2, $zero, $zero
 		add $t3, $zero, $zero
 		add $t4, $zero, $zero
-		
+
 		addi $sp, $sp, -4
 		sw $ra, 0($sp)
-		
+
 		jal saveTursLoop
-		
+
 		addi $t0, $zero, 4744
 		jal saveTursLoop
-		
+
 		addi $t0, $zero, 7224
 		jal saveTursLoop
-		
+
 		addi $t0, $zero, 7344
 		jal saveTursLoop
-		
+
 		lw $ra, 0($sp)
 		addi $sp, $sp, 4
-		
+
 		jr $ra
 
-	
+
 	saveTursLoop:
 		beq $t1, 3, saveTursEnd
 	saveSingleTur:
@@ -651,37 +651,37 @@
 	saveSingleTurCol:
 		beq $t3, 3, saveSingleTurColEnd
 		sw $t0, turShape($t4)
-		
+
 		addi $t4, $t4, 4
 		addi $t3, $t3, 1
 		addi $t0, $t0, 256
 		j saveSingleTurCol
-		
+
 	saveSingleTurColEnd:
 		add $t3, $zero, $zero
 		addi $t2, $t2, 1
 		addi $t0, $t0, -764
 		j saveSingleTur
-	
+
 	saveSingleTurEnd:
 		add $t2, $zero, $zero
-		
+
 		addi $t0, $t0, -256
 		sw $t0, turShape($t4)
 		addi $t4, $t4, 4
-		
+
 		addi $t0, $t0, -16
 		sw $t0, turShape($t4)
 		addi $t4, $t4, 4
-		
+
 		addi $t0, $t0, 1024
 		sw $t0, turShape($t4)
 		addi $t4, $t4, 4
-		
+
 		addi $t0, $t0, 16
 		sw $t0, turShape($t4)
 		addi $t4, $t4, 4
-		
+
 		addi $t0, $t0, -760
 		addi $t1, $t1, 1
 		j saveTursLoop
@@ -695,17 +695,17 @@
 		lw $t1, turColor
 		add $t2, $zero, $zero
 		add $t3, $zero, $zero
-		
+
 		addi $sp, $sp, -4
 		sw $ra, 0($sp)
-		
+
 		jal paintTursLoop
-		
+
 		lw $ra, 0($sp)
 		addi $sp, $sp, 4
-		
+
 		jr $ra
-		
+
 	paintTursLoop:
 		beq $t2, 624, paintLogsEnd
 		lw $t3, turShape($t2)
@@ -713,23 +713,23 @@
 		sw $t1, 0($t3)
 		addi $t2, $t2, 4
 		j paintTursLoop
-		
+
 	paintTursEnd:
 		jr $ra
-		
-#################### Draw Trucks ###################### 
+
+#################### Draw Trucks ######################
 	drawTrucks:
 		addi $sp, $sp, -4
 		sw $ra, 0($sp)
-		
+
 		jal saveTrucks
 		jal paintTrucks
-		
+
 		lw $ra, 0($sp)
 		addi $sp, $sp, 4
-		
+
 		jr $ra
-	
+
 ################### Save Trucks ####################
 	saveTrucks:
 		addi $t0, $zero, 9480
@@ -737,29 +737,29 @@
 		add $t2, $zero, $zero
 		add $t3, $zero, $zero
 		add $t4, $zero, $zero
-		
+
 		addi $sp, $sp, -4
 		sw $ra, 0($sp)
-		
+
 		jal saveTruckTail
-		
+
 		addi $t0, $t0, 32
 		jal saveTruckTail
-		
+
 		addi $t0, $t0, 48
 		jal saveTruckTail
-		
+
 		add $t0, $zero, 12080
 		jal saveTruckTail
-		
+
 		addi $t0, $t0, 112
 		jal saveTruckTail
-		
+
 		lw $ra, 0($sp)
 		addi $sp, $sp, 4
-		
+
 		jr $ra
-		
+
 	saveTruckTail:
 		beq $t2, 6, saveTruckTailEnd
 	saveTruckTailCol:
@@ -769,16 +769,16 @@
 		addi $t0, $t0, 256
 		addi $t3, $t3, 1
 		j saveTruckTailCol
-	
+
 	saveTruckTailColEnd:
 		addi $t2, $t2, 1
 		add $t3, $zero, $zero
 		addi $t0, $t0, -1276
 		j saveTruckTail
-		
+
 	saveTruckTailEnd:
 		addi $t0, $t0, 256
-				
+
 	saveTruckLink:
 		beq $t3, 3, saveTruckLinkEnd
 		sw $t0, truckShape($t4)
@@ -786,11 +786,11 @@
 		addi $t0, $t0, 256
 		addi $t3, $t3, 1
 		j saveTruckLink
-	
+
 	saveTruckLinkEnd:
 		add $t3, $zero, $zero
 		addi $t0, $t0, -1020
-		
+
 	saveTruckHead:
 		beq $t2, 9, saveTruckHeadEnd
 	saveTruckHeadCol:
@@ -800,13 +800,13 @@
 		addi $t0, $t0, 256
 		addi $t3, $t3, 1
 		j saveTruckHeadCol
-	
+
 	saveTruckHeadColEnd:
 		addi $t2, $t2, 1
 		add $t3, $zero, $zero
 		addi $t0, $t0, -1276
 		j saveTruckHead
-	
+
 	saveTruckHeadEnd:
 		addi $t0, $t0, 256
 		add $t3, $zero, $zero
@@ -817,21 +817,21 @@
 		addi $t0, $t0, 256
 		addi $t3, $t3, 1
 		j saveTruckTip
-		
+
 	saveTruckEnd:
 		add $t1, $zero, $zero
 		add $t2, $zero, $zero
 		add $t3, $zero, $zero
 		addi $t0, $t0, -1020
 		jr $ra
-		
+
 #################### Paint Trucks #####################
 	paintTrucks:
 		lw $t0, basePoint
 		lw $t1, truckColor
 		add $t2, $zero, $zero
 		add $t3, $zero, $zero
-		
+
 	paintTrucksLoop:
 		beq $t2, 1020, paintTrucksEnd
 		lw $t3, truckShape($t2)
@@ -840,7 +840,7 @@
 		addi $t2, $t2, 4
 		addi $t4, $t4, 4
 		j paintTrucksLoop
-		
+
 	paintTrucksEnd:
 		jr $ra
 
@@ -849,84 +849,84 @@
 		add $t0, $zero, $zero
 		add $t1, $zero, $zero
 		addi $t2, $zero, 256
-		
+
 	shiftLogsLoop:
 		beq $t1, 1440, shiftLogsEnd
 		lw $t0, logShape($t1)
-		
+
 		rem $t3, $t0, $t2
 	shiftLogsRem:
 		beq $t3, 244, shiftLogsOver
-		
+
 		addi $t0, $t0, 4
 		sw $t0, logShape($t1)
-		
+
 		addi $t1, $t1, 4
 		j shiftLogsLoop
 	shiftLogsOver:
 		addi $t0, $t0, -236
 		sw $t0, logShape($t1)
-		
+
 		addi $t1, $t1, 4
 		j shiftLogsLoop
-		
+
 	shiftLogsEnd:
 		jr $ra
-		
+
 ###################### Shift Cars #####################
 	shiftCars:
 		add $t0, $zero, $zero
 		add $t1, $zero, $zero
 		addi $t2, $zero, 256
-		
+
 	shiftCarsLoop:
 		beq $t1, 616, shiftLogsEnd
 		lw $t0, carShape($t1)
-		
+
 		rem $t3, $t0, $t2
 	shiftCarsRem:
 		beq $t3, 8, shiftCarsOver
-		
+
 		addi $t0, $t0, -4
 		sw $t0, carShape($t1)
-		
+
 		addi $t1, $t1, 4
 		j shiftCarsLoop
-		
+
 	shiftCarsOver:
 		addi $t0, $t0, 236
 		sw $t0, carShape($t1)
-		
-		addi $t1, $t1, 4	
-		j shiftCarsLoop	
-	
+
+		addi $t1, $t1, 4
+		j shiftCarsLoop
+
 	shiftCarsEnd:
 		jr $ra
-		
+
 ################ Shift Turtles ###############
 	shiftTurs:
 		add $t0, $zero, $zero
 		add $t1, $zero, $zero
 		addi $t2, $zero, 256
-	
+
 	shiftTursLoop:
 		beq $t1, 624, shiftTursEnd
 		lw $t0, turShape($t1)
-		
+
 		rem $t3, $t0, $t2
 	shiftTursRem:
 		beq $t3, 8, shiftTursOver
-		
+
 		addi $t0, $t0, -4
 		sw $t0, turShape($t1)
-		
+
 		addi $t1, $t1, 4
 		j shiftTursLoop
-		
+
 	shiftTursOver:
 		addi $t0, $t0, 236
 		sw $t0, turShape($t1)
-		
+
 		addi $t1, $t1, 4
 		j shiftTursLoop
 	shiftTursEnd:
@@ -937,30 +937,30 @@
 		add $t0, $zero, $zero
 		add $t1, $zero, $zero
 		addi $t2, $zero, 256
-		
+
 	shiftTrucksLoop:
 		beq $t1, 1020, shiftTrucksEnd
 		lw $t0, truckShape($t1)
-		
+
 		rem $t3, $t0, $t2
 	shiftTrucksRem:
 		beq $t3, 244, shiftTrucksOver
-		
+
 		addi $t0, $t0, 4
 		sw $t0, truckShape($t1)
-		
+
 		addi $t1, $t1, 4
 		j shiftTrucksLoop
 	shiftTrucksOver:
 		addi $t0, $t0, -236
 		sw $t0, truckShape($t1)
-		
+
 		addi $t1, $t1, 4
 		j shiftTrucksLoop
-		
+
 	shiftTrucksEnd:
 		jr $ra
-		
+
 ############## Left ###################
 	left:
 		lw $t0, frogShape($zero)
@@ -969,13 +969,13 @@
 		beq $t2, 64, LeftEnd
 		lw $t0, frogShape($t2)
 		addi $t0, $t0, -20
-		
+
 		sw $t0, frogShape($t2)
 		addi $t2, $t2, 4
 		j LeftLoop
 	LeftEnd:
 		jr $ra
-		
+
 ############## Right ###################
 	right:
 		lw $t0, frogShape($zero)
@@ -983,15 +983,15 @@
 	rightLoop:
 		beq $t2, 64, rightEnd
 		lw $t0, frogShape($t2)
-		
+
 		addi $t0, $t0, 20
-		
+
 		sw $t0, frogShape($t2)
 		addi $t2, $t2, 4
 		j rightLoop
 	rightEnd:
 		jr $ra
-		
+
 ############## Up ###################
 	up:
 		lw $t0, frogShape($zero)
@@ -999,9 +999,9 @@
 	upLoop:
 		beq $t2, 64, upEnd
 		lw $t0, frogShape($t2)
-		
+
 		addi $t0, $t0, -1280
-		
+
 		sw $t0, frogShape($t2)
 		addi $t2, $t2, 4
 		j upLoop
@@ -1015,9 +1015,9 @@
 	downLoop:
 		beq $t2, 64, downEnd
 		lw $t0, frogShape($t2)
-		
+
 		addi $t0, $t0, 1280
-		
+
 		sw $t0, frogShape($t2)
 		addi $t2, $t2, 4
 		j downLoop
@@ -1034,6 +1034,14 @@
 	frogBelowSafeZone:
 		sgt, $t2, $t0, 9468
 		beq $t2, 1, frogRoadCollision
+		j frogOverMidZone
+	frogOverMidZone:
+		slti $t2, $t0, 8200
+		beq $t2, 1, frogBelowGoalZone
+		j frogNotHitted
+	frogBelowGoalZone:
+		sgt, $t2, $t0, 3080
+		beq $t2, 1, frogWaterCollision
 		j frogNotHitted
 
 ############### Frog Road Collision #################
@@ -1041,14 +1049,15 @@
 		lw $t0, basePoint
 		lw $t1, frogShape($zero)
 		lw $t2, roadColor
+		add $t3, $zero, $zero
 		add $t0, $t0, $t1
-	frogCollisionLoop:
+	frogRoadCollisionLoop:
 		beq $t3, 5, frogNotHitted
 		lw $t4, 0($t0)
 		bne $t2, $t4, frogHitted
 		addi $t3, $t3, 1
 		addi $t0, $t0, 4
-		j frogCollisionLoop
+		j frogRoadCollisionLoop
 
 	frogHitted:
 		addi $t5, $zero, 1
@@ -1058,6 +1067,35 @@
 	frogNotHitted:
 		add $t5, $zero, $zero
 		jr $ra
+
+############### Frog Water Collision #################
+	frogWaterCollision:
+		lw $t0, basePoint
+		addi $t0, $t0, 260
+		lw $t1, frogShape($zero)
+		lw $t2, waterColor
+		add $t0, $t0, $t1
+		add $t3, $zero, $zero
+		add $t5, $zero, $zero
+
+	frogWaterCollisionLoop:
+		beq $t3, 5, countWater
+		lw $t4, 0($t0)
+		beq $t2, $t4, addWater
+		addi $t3, $t3, 1
+		addi $t0, $t0, 4
+		j frogWaterCollisionLoop
+
+	addWater:
+		addi $t5, $t5, 1
+		addi $t3, $t3, 1
+		addi $t0, $t0, 4
+		j frogWaterCollisionLoop
+
+	countWater:
+		slti, $t5, $t5, 3
+		beq $t5, 1, frogNotHitted
+		j frogHitted
 		
 ############### Start Over ##################
 	startOver:
