@@ -54,7 +54,7 @@
 	
 .text
 
-################## Main #############################
+################## Main Function #############################
 	main:
 		jal drawBG
 		jal drawFrog
@@ -66,9 +66,9 @@
 ################# Movement ##################
 	movement:
 		lw $t8, 0xffff0000
- 		beq $t8, 1, keyboardPressed
-		j refresh
-		
+ 		beq $t8, 1, keyboardPressed	#Check for keyboard Input
+		j refresh			#Refresh screen
+
 ################# Keyboard Pressed ###############33
 	keyboardPressed:
 		lw $t1, 0xffff0004
@@ -76,7 +76,7 @@
  		beq $t1, 0x77, wPressed
  		beq $t1, 0x73, sPressed
  		beq $t1, 0x64, dPressed
- 
+
  	aPressed:
  		jal left
  		j refresh
@@ -89,78 +89,78 @@
  	dPressed:
  		jal right
  		j refresh
-		
+
 ################### Refresh ##################
 	refresh:
 		jal drawFrame
-		
-		jal shiftLogs	
+
+		jal shiftLogs
 		jal shiftCars
 		jal shiftTurs
-		jal shiftTrucks
-		
-		jal drawWaterRoad
-		
+		jal shiftTrucks		# Update Positions of Barriers
+
+		jal drawWaterRoad	# Re-draw the Background
+
 		jal paintLogs
 		jal paintCars
 		jal paintTurs
-		jal paintTrucks
-		
+		jal paintTrucks		# Re-draw the Barriers
+
 		jal drawSafeZone
-		jal drawGoalZone
-		
-		jal frogCollision
+		jal drawGoalZone	# Re-draw the Safe Zones
+
+		jal frogCollision	# Detect Frog Hitted or Not
 		beq $t5, 1, startOver
-	
+
 	refreshFrog:
-		jal drawFrog
-		
+		jal drawFrog	# Re-draw Frog If Not Hitted
+
 		li $v0, 32
 		la $a0, 100
-		syscall
-		
-		j movement
-################### draw Background #####################		
+		syscall		# Sleep
+
+		j movement	# Repeat the Procedure
+################### Draw Background #####################
 
 	drawBG:
 		addi $sp, $sp, -4
 		sw $ra, 0($sp)
-		
+
 		jal drawFrame
 		jal drawSafeZone
 		jal drawGoalZone
 		jal drawWaterRoad
-		
-		
+
+
 		lw $ra, 0($sp)
 		addi $sp, $sp, 4
 		jr $ra
 
-################## draw Frame #################################
-		
+################## Draw Frame #################################
+
 	drawFrame:
 		lw $t0, basePoint
 		lw $t1, frameColor
-		
+
 		addi $sp, $sp, -4
 		sw $ra, 0($sp)
-		
+
 		add $t2, $zero, $zero
 		jal frameLeft
-		
+
 		addi $t0, $t0, 15872
 		jal frameBottom
-		
+
 		addi $t0, $t0, 16376
 		jal frameRight
-		
+
 		addi $t0, $t0, 252
 		jal frameTop
-		
+
 		lw $ra, 0($sp)
 		addi $sp, $sp, 4
 		jr $ra
-	
+
 	frameLeft:
 		beq $t2, 62, frameEnd
 		sw $t1, 0($t0)
@@ -168,7 +168,7 @@
 		addi $t0, $t0, 256
 		addi $t2, $t2, 1
 		j frameLeft
-	
+
 	frameBottom:
 		beq $t2, 62, frameEnd
 		sw $t1, 0($t0)
@@ -176,7 +176,7 @@
 		addi $t0, $t0, 4
 		addi $t2, $t2, 1
 		j frameBottom
-	
+
 	frameRight:
 		beq $t2, 62, frameEnd
 		sw $t1, 0($t0)
@@ -184,7 +184,7 @@
 		addi $t0, $t0, -256
 		addi $t2, $t2, 1
 		j frameRight
-	
+
 	frameTop:
 		beq $t2, 62, frameEnd
 		sw $t1, 0($t0)
@@ -192,46 +192,46 @@
 		addi $t0, $t0, -4
 		addi $t2, $t2, 1
 		j frameTop
-	
+
 	frameEnd:
 		add $t2, $zero, $zero
 		lw $t0, basePoint
 		jr $ra
-		
-################# draw Safe Zone ######################
+
+################# Draw Safe Zone ######################
 
 	drawSafeZone:
 		lw $t0, basePoint
 		addi $t0, $t0, 520
 		lw $t1, safeZoneColor
 		add $t2, $zero, $zero
-		
+
 		addi $sp, $sp, -4
 		sw $ra, 0($sp)
-		
-		jal safeZoneLoop  
-		
+
+		jal safeZoneLoop
+
 		lw $t0, basePoint
 		addi $t0, $t0, 1800
 		add $t2, $zero, $zero
 		jal safeZoneLoop  #Top safe zone
-		
-		
+
+
 		lw $t0, basePoint
 		addi $t0, $t0, 8200
 		add $t2, $zero, $zero
 		jal safeZoneLoop  #Middle safe zone
-		
+
 		lw $t0, basePoint
 		addi $t0, $t0, 14600
 		add $t2, $zero, $zero
 		jal safeZoneLoop  #Bottom safe zone
-		
+
 		lw $ra, 0($sp)
 		addi $sp, $sp, 4
-		
+
 		jr $ra
-		
+
 	safeZoneLoop:
 		beq $t2, 60, safeZoneEnd
 		sw $t1, 0($t0)
@@ -242,10 +242,10 @@
 		addi $t2, $t2, 1
 		addi $t0, $t0, 4
 		j safeZoneLoop
-		
+
 	safeZoneEnd:
 		jr $ra
-		
+
 ####################### Draw Goal Zone #######################
 	drawGoalZone:
 		lw $t0, basePoint
@@ -253,20 +253,20 @@
 		lw $t1, goalColor
 		add $t2, $zero, $zero
 		add $t3, $zero, $zero
-		
+
 		addi $sp, $sp, -4
 		sw $ra, 0($sp)
-		
+
 		jal drawGoalLoop
-		
+
 		lw $ra, 0($sp)
 		addi $sp, $sp, 4
-		
+
 		jr $ra
-	
+
 	drawGoalLoop:
 		beq $t2, 4, drawGoalEnd
-	
+
 	drawSingleGoal:
 		beq $t3, 5, singleGoalEnd
 		sw $t1, 0($t0)
@@ -277,17 +277,17 @@
 		addi $t3, $t3, 1
 		addi $t0, $t0, 4
 		j drawSingleGoal
-	
+
 	singleGoalEnd:
 		addi $t2, $t2, 1
 		add $t3, $zero, $zero
 		addi $t0, $t0, 40
 		j drawGoalLoop
-	
+
 	drawGoalEnd:
 		jr $ra
-		
-		
+
+
 ################# draw Water and Road ####################
 	drawWaterRoad:
 		lw $t0, basePoint
@@ -295,51 +295,51 @@
 		lw $t1, waterColor
 		add $t2, $zero, $zero
 		add $t3, $zero, $zero
-		
+
 		addi $sp, $sp, -4
 		sw $ra, 0($sp)
-		
+
 		jal waterRoadLoop  #Draw Water
-		
+
 		lw $t0, basePoint
 		addi $t0, $t0, 9480
 		lw $t1, roadColor
 		add $t2, $zero, $zero
 		add $t3, $zero, $zero
 		jal waterRoadLoop  #Draw Road
-		
+
 		lw $ra, 0($sp)
 		addi $sp, $sp, 4
-		
+
 		jr $ra
-	
-	waterRoadLoop:		
+
+	waterRoadLoop:
 		beq $t2, 20, waterRoadEnd
-		
+
 	waterRoadRowLoop:
 		beq $t3, 60, waterRoadLoopEnd
 		sw $t1, 0($t0)
 		addi $t3, $t3, 1
 		addi $t0, $t0, 4
 		j waterRoadRowLoop
-		
-	waterRoadLoopEnd:	
+
+	waterRoadLoopEnd:
 		addi $t0, $t0, 16
 		add $t3, $zero, $zero
 		addi $t2, $t2, 1
 		j waterRoadLoop
-		
-	
+
+
 	waterRoadEnd:
 		jr $ra
-		
+
 ################ Draw Frog ##################
 	drawFrog:
 		lw $t0, basePoint
 		lw $t1, frogColor
 		la $t2, frogShape
 		add $t3, $zero, $zero
-		
+
 	drawFrogLoop:
 		beq $t3, 16, drawFrogEnd
 		lw $t4, 0($t2)
@@ -348,86 +348,83 @@
 		addi $t3, $t3, 1
 		addi $t2, $t2, 4
 		j drawFrogLoop
-	
+
 	drawFrogEnd:
 		jr $ra
-		
+
 ####################### Draw Logs ######################
 	drawLogs:
 		addi $sp, $sp, -4
 		sw $ra, 0($sp)
-		
-		jal saveLogs
-		jal paintLogs
-		
+
+		jal saveLogs	# Save Logs as Points in Array
+		jal paintLogs	# Paint Logs Based on Relative Position
+
 		lw $ra, 0($sp)
 		addi $sp, $sp, 4
-		
+
 		jr $ra
-		
+
 ################ Save Logs ###################
-		
-	
 	saveLogs:
 		addi $t0, $zero, 3336
 		add $t1, $zero, $zero
 		addi $t2, $zero, 5
 		add $t3, $zero, $zero
 		add $t4, $zero, $zero
-		
+
 		addi $sp, $sp, -4
 		sw $ra, 0($sp)
-		
-		jal saveLogsRow
-		
-		
+
+		jal saveLogsRow		# Log1 in Line1
+
 		addi $t2, $zero, 20
 		addi $t0, $t0, 28
-		jal saveLogsRow
-		
+		jal saveLogsRow	 	# Log2 in Line1
+
 		addi $t2, $zero, 10
 		addi $t0, $t0, 8
-		jal saveLogsRow
-		
+		jal saveLogsRow		# Log3 in Line1
+
 		addi $t2, $zero, 10
 		addi $t0, $t0, 24
-		jal saveLogsRow
-		
-		
+		jal saveLogsRow		# Log4 in Line 1
+
+
 		addi $t2, $zero, 15
 		addi $t0, $zero, 5900
-		jal saveLogsRow
-		
+		jal saveLogsRow		# Log1 in Line2
+
 		addi $t2, $zero, 10
 		addi $t0, $t0, 28
-		jal saveLogsRow
-		
+		jal saveLogsRow		# Log2 in Line2
+
 		addi $t2, $zero, 20
 		addi $t0, $t0, 20
-		jal saveLogsRow
-		
+		jal saveLogsRow		# Log3 in Line2
+
 		lw $ra, 0($sp)
 		addi $sp, $sp, 4
-		
+
 		jr $ra
-		
+
 	saveLogsRow:
-		beq $t1, $t2, saveLogsEnd
+		beq $t1, $t2, saveLogsEnd	# Number of Loops Based on Length of the Log
 	saveLogsCol:
-		beq $t3, 4, saveLogsColEnd
+		beq $t3, 4, saveLogsColEnd	# The Log Has a Width of 4
 		sw $t0, logShape($t4)
-		
+
 		addi $t4, $t4, 4
 		addi $t0, $t0, 256
 		addi $t3, $t3, 1
 		j saveLogsCol
-		
+
 	saveLogsColEnd:
-		addi $t0, $t0, -1020
+		addi $t0, $t0, -1020		# Re-locate Starting Point after One Column
 		add $t3, $zero, $zero
 		addi $t1, $t1, 1
 		j saveLogsRow
-		
+
 	saveLogsEnd:
 		add $t1, $zero, $zero
 		jr $ra
@@ -439,19 +436,19 @@
 		lw $t1, logColor
 		add $t2, $zero, $zero
 		add $t3, $zero, $zero
-		
+
 		addi $sp, $sp, -4
 		sw $ra, 0($sp)
-		
-		jal paintLogsLoop	
-		
+
+		jal paintLogsLoop
+
 		lw $ra, 0($sp)
 		addi $sp, $sp, 4
-		
+
 		jr $ra
-		
+
 	paintLogsLoop:
-		beq $t2, 1440, paintLogsEnd
+		beq $t2, 1440, paintLogsEnd	# Number of Loops Based on Number of Data Points in Array
 		lw $t3, logShape($t2)
 		add $t3, $t0, $t3
 		sw $t1, 0($t3)
