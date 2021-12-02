@@ -35,13 +35,12 @@
 	waterColor: .word 0xbce6e4
 	roadColor: .word 0x989898
 	goalColor: .word 0x444444
+	takenColor: .word 0x123456
 	frogColor: .word 0x266000
 	logColor: .word 0xc58811
 	carColor: .word 0xae4547
 	turColor: .word 0x487053
 	truckColor: .word 0xcdcbcb
-
-	emptyLine: .asciiz "\n"
 
 	frogShapeOri: .word 14720, 14728, 14736, 14980, 14984, 14988, 15236, 15240, 15244, 15488, 15492, 15496, 15500, 15504, 15744, 15760
 	frogShape: .word 14720, 14728, 14736, 14980, 14984, 14988, 15236, 15240, 15244, 15488, 15492, 15496, 15500, 15504, 15744, 15760
@@ -49,13 +48,14 @@
 	turShape: .space 624
 	carShape: .space 616
 	truckShape: .space 1020
+	flags: .space 20	# NumberOfCollisions, First Goal, Second Goal, Third Goal, Fourth Goal
 
-	add $t7, $zero, $zero
 
 .text
 
 ################## Main Function #############################
 	main:
+		jal initFlags
 		jal drawBG
 		jal drawFrog
 		jal drawLogs
@@ -63,13 +63,31 @@
 		jal drawTurs
 		jal drawTrucks
 		j movement
+
+################ Initialize Flags ####################
+	initFlags:
+		add $t0, $zero, $zero
+		add $t1, $zero, $zero
+
+	initFlagsLoop:
+		beq $t1, 20, initFlagsEnd
+		sw $t0, flags($t1)
+
+		addi $t1, $t1, 4
+
+		sw $t0, flags($t1)
+		j initFlagsLoop
+
+	initFlagsEnd:
+		jr $ra
+
 ################# Movement ##################
 	movement:
 		lw $t8, 0xffff0000
  		beq $t8, 1, keyboardPressed	#Check for keyboard Input
 		j refresh			#Refresh screen
 
-################# Keyboard Pressed ###############33
+################# Keyboard Pressed ###############
 	keyboardPressed:
 		lw $t1, 0xffff0004
 		beq $t1, 0x61, aPressed
@@ -253,6 +271,7 @@
 		lw $t1, goalColor
 		add $t2, $zero, $zero
 		add $t3, $zero, $zero
+		addi $t4, $zero, 4
 
 		addi $sp, $sp, -4
 		sw $ra, 0($sp)
@@ -266,6 +285,15 @@
 
 	drawGoalLoop:
 		beq $t2, 4, drawGoalEnd
+
+	goalZoneTaken:
+		lw $t5, flags($t4)
+		addi $t4, $t4, 4
+		beq $t5, 1, drawTakenGoal
+		j drawSingleGoal
+
+	drawTakenGoal:
+		lw $t1, takenColor
 
 	drawSingleGoal:
 		beq $t3, 5, singleGoalEnd
@@ -1024,7 +1052,7 @@
 	downEnd:
 		jr $ra
 
-################ Frog hitted #################
+################ Frog Collision Options #################
 	frogCollision:
 		lw $t0, frogShape($zero)
 	frogOverStartZone:
@@ -1042,7 +1070,7 @@
 	frogBelowGoalZone:
 		sgt, $t2, $t0, 3080
 		beq $t2, 1, frogWaterCollision
-		j frogNotHitted
+		j frogGoalCollision
 
 ############### Frog Road Collision #################
 	frogRoadCollision:
@@ -1058,15 +1086,6 @@
 		addi $t3, $t3, 1
 		addi $t0, $t0, 4
 		j frogRoadCollisionLoop
-
-	frogHitted:
-		addi $t5, $zero, 1
-		addi $7, $7, 1
-		beq $7, 3, endOfGame
-		jr $ra
-	frogNotHitted:
-		add $t5, $zero, $zero
-		jr $ra
 
 ############### Frog Water Collision #################
 	frogWaterCollision:
@@ -1096,6 +1115,36 @@
 		slti, $t5, $t5, 3
 		beq $t5, 1, frogNotHitted
 		j frogHitted
+
+############### Frog Goal Zone Collision ###############
+	frogGoalCollision:
+		lw $t0, basePoint
+		lw $t1, frogShape($zero)
+		lw $t2, goalColor
+		add $t3, $zero, $zero
+		add $t0, $t0, $t1
+
+	frogGoalCollisionLoop:
+		beq $t3, 5, frogNotHitted
+		lw $t4, 0($t0)
+		bne $t2, $t4, frogHitted
+		addi $t3, $t3, 1
+		addi $t0, $t0, 4
+		j frogGoalCollisionLoop
+
+################ Frog Hitted ###################
+	frogHitted:
+		addi $t5, $zero, 1
+		lw $t7, flags($zero)
+		addi $7, $7, 1
+		sw $t7, flags($zero)
+
+		beq $7, 3, endOfGame
+		jr $ra
+	frogNotHitted:
+		add $t5, $zero, $zero
+		jr $ra
+
 		
 ############### Start Over ##################
 	startOver:
