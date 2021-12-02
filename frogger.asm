@@ -3,7 +3,7 @@
 # CSC258H5S Fall 2021 Assembly Final Project
 # University of Toronto, St. George
 #
-# Student: Xuanyi Piao
+# Student: Xuanyi Piao, 1005812818
 #
 # Bitmap Display Configuration:
 # - Unit width in pixels: 4
@@ -40,18 +40,18 @@
 	carColor: .word 0xae4547
 	turColor: .word 0x487053
 	truckColor: .word 0xcdcbcb
-	
+
 	emptyLine: .asciiz "\n"
-	
-	frogShapeOri: .word 14600, 14608, 14616, 14860, 14864, 14868, 15116, 15120, 15124, 15368, 15372, 15376, 15380, 15384, 15624, 15640
-	frogShape: .word 14600, 14608, 14616, 14860, 14864, 14868, 15116, 15120, 15124, 15368, 15372, 15376, 15380, 15384, 15624, 15640
+
+	frogShapeOri: .word 14720, 14728, 14736, 14980, 14984, 14988, 15236, 15240, 15244, 15488, 15492, 15496, 15500, 15504, 15744, 15760
+	frogShape: .word 14720, 14728, 14736, 14980, 14984, 14988, 15236, 15240, 15244, 15488, 15492, 15496, 15500, 15504, 15744, 15760
 	logShape: .space 1440
 	turShape: .space 624
 	carShape: .space 616
 	truckShape: .space 1020
-	
+
 	add $t7, $zero, $zero
-	
+
 .text
 
 ################## Main Function #############################
