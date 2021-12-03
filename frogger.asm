@@ -35,8 +35,8 @@
 	waterColor: .word 0xbce6e4
 	roadColor: .word 0x989898
 	goalColor: .word 0x444444
-	takenColor: .word 0x123456
-	frogColor: .word 0x266000
+	takenColor: .word 0x7cfc00
+	frogColor: .word 0x3d9140
 	logColor: .word 0xc58811
 	carColor: .word 0xae4547
 	turColor: .word 0x487053
@@ -48,14 +48,13 @@
 	turShape: .space 624
 	carShape: .space 616
 	truckShape: .space 1020
-	flags: .space 20	# NumberOfCollisions, First Goal, Second Goal, Third Goal, Fourth Goal
+	flags: .word 0, 0, 0, 0, 0	# NumberOfCollisions, First Goal, Second Goal, Third Goal, Fourth Goal
 
 
 .text
 
 ################## Main Function #############################
 	main:
-		jal initFlags
 		jal drawBG
 		jal drawFrog
 		jal drawLogs
@@ -64,22 +63,6 @@
 		jal drawTrucks
 		j movement
 
-################ Initialize Flags ####################
-	initFlags:
-		add $t0, $zero, $zero
-		add $t1, $zero, $zero
-
-	initFlagsLoop:
-		beq $t1, 20, initFlagsEnd
-		sw $t0, flags($t1)
-
-		addi $t1, $t1, 4
-
-		sw $t0, flags($t1)
-		j initFlagsLoop
-
-	initFlagsEnd:
-		jr $ra
 
 ################# Movement ##################
 	movement:
@@ -134,7 +117,7 @@
 		jal drawFrog	# Re-draw Frog If Not Hitted
 
 		li $v0, 32
-		la $a0, 100
+		la $a0, 200
 		syscall		# Sleep
 
 		j movement	# Repeat the Procedure
@@ -309,6 +292,7 @@
 	singleGoalEnd:
 		addi $t2, $t2, 1
 		add $t3, $zero, $zero
+		lw $t1, goalColor
 		addi $t0, $t0, 40
 		j drawGoalLoop
 
@@ -1068,7 +1052,7 @@
 		beq $t2, 1, frogBelowGoalZone
 		j frogNotHitted
 	frogBelowGoalZone:
-		sgt, $t2, $t0, 3080
+		sgt, $t2, $t0, 3060
 		beq $t2, 1, frogWaterCollision
 		j frogGoalCollision
 
@@ -1120,18 +1104,51 @@
 	frogGoalCollision:
 		lw $t0, basePoint
 		lw $t1, frogShape($zero)
-		lw $t2, goalColor
+		lw $t2, safeZoneColor
 		add $t3, $zero, $zero
 		add $t0, $t0, $t1
 
 	frogGoalCollisionLoop:
-		beq $t3, 5, frogNotHitted
+		beq $t3, 5, frogGoalOccupied
 		lw $t4, 0($t0)
-		bne $t2, $t4, frogHitted
+		beq $t2, $t4, frogHitted
 		addi $t3, $t3, 1
 		addi $t0, $t0, 4
 		j frogGoalCollisionLoop
 
+
+################# Frog Goal Occupied ##############
+	frogGoalOccupied:
+		addi $t6, $zero, 1
+		lw $t1, frogShape($zero)
+
+
+	frogFirstGoal:
+		beq $t1, 1820, frogFirstChange
+	frogSecondGoal:
+		beq $t1, 1880, frogSecondChange
+	frogThirdGoal:
+		beq $t1, 1940, frogThirdChange
+	frogFourthGoal:
+		beq $t1, 2000, frogFourthChange
+	frogFirstChange:
+		addi $t7, $zero, 4
+		j frogGoalTaken
+	frogSecondChange:
+		addi $t7, $zero, 8
+		j frogGoalTaken
+	frogThirdChange:
+		addi $t7, $zero, 12
+		j frogGoalTaken
+	frogFourthChange:
+		addi $t7, $zero, 16
+		j frogGoalTaken
+	frogGoalTaken:
+		sw $t6, flags($t7)
+		li $v0, 1
+		move $a0, $t7
+		syscall
+		j frogNotHitted
 ################ Frog Hitted ###################
 	frogHitted:
 		addi $t5, $zero, 1
@@ -1145,28 +1162,20 @@
 		add $t5, $zero, $zero
 		jr $ra
 
-		
+
 ############### Start Over ##################
 	startOver:
 		add $t1, $zero, $zero
 	startOverLoop:
 		beq $t1, 64, startOverEnd
-		lw $t2, frogShapeOri($t1)		
+		lw $t2, frogShapeOri($t1)
 		sw $t2, frogShape($t1)
 		addi $t1, $t1, 4
 		j startOverLoop
 	startOverEnd:
 		j refreshFrog
-		
+
 ################ End of Game #################
 	endOfGame:
 		li $v0, 10
 		syscall
-		
-		
-		
-	
-
-		
-		
-		
