@@ -31,31 +31,53 @@
 .data
 	basePoint: .word 0x10008000
 	frameColor: .word 0xf4f8bb
+	topBarColor: .word 0x000000
 	safeZoneColor: .word 0xbca0c8
 	waterColor: .word 0xbce6e4
 	roadColor: .word 0x989898
 	goalColor: .word 0x444444
-	takenColor: .word 0x7cfc00
+	takenColor: .word 0xf4f8bb
 	frogColor: .word 0x3d9140
 	logColor: .word 0xc58811
 	carColor: .word 0xae4547
 	turColor: .word 0x487053
 	truckColor: .word 0xcdcbcb
+	omtColor: .word 0xff8a3c
+	chosenColor: .word 0x3d9140
+	unchosenColor: .word 0xffffff
+
 
 	frogShapeOri: .word 14720, 14728, 14736, 14980, 14984, 14988, 15236, 15240, 15244, 15488, 15492, 15496, 15500, 15504, 15744, 15760
 	frogShape: .word 14720, 14728, 14736, 14980, 14984, 14988, 15236, 15240, 15244, 15488, 15492, 15496, 15500, 15504, 15744, 15760
 	logShape: .space 1440
 	turShape: .space 624
-	carShape: .space 616
-	truckShape: .space 1020
+	carShape: .space 528
+	truckShape: .space 816
 	flags: .word 0, 0, 0, 0, 0	# NumberOfCollisions, First Goal, Second Goal, Third Goal, Fourth Goal
 
+	One: .word 256, 512, 768, 4, 1028, 8, 1032, 268, 524, 780,
+		276, 532, 788, 1044, 280, 540, 796, 1052,
+		548, 804, 296, 808, 1064, 556, 1068
+	More: .word 256, 512, 768, 1024, 4, 264, 12, 272, 528, 784, 1040,
+		536, 792, 284, 1052, 544, 800,
+		552, 808, 1064, 300, 560,
+		568, 824, 316, 828, 1084, 576, 1088
+	Try: .word 0, 4, 260, 516, 772, 1028, 8, 12,
+		528, 784, 1040, 276, 536,
+		288, 544, 800, 1312, 1316, 296, 552, 808, 1064, 1320
+	QM: .word 256, 4, 772, 1284, 264, 520
+	Yes: .word 0, 260, 520, 776, 1032, 268, 16,
+		532, 788, 280, 792, 1048, 540, 1052,
+		292, 548, 1060, 296, 552, 1064, 300, 812, 1068
+	N: .word 0, 256, 512, 768, 1024, 4, 264, 524, 16, 272, 528, 784, 1040,
+		284, 536, 544, 792, 800, 1052
 
 .text
 
 ################## Main Function #############################
 	main:
 		jal drawBG
+		jal drawLives
 		jal drawFrog
 		jal drawLogs
 		jal drawCars
@@ -114,10 +136,13 @@
 		beq $t5, 1, startOver
 
 	refreshFrog:
+		jal drawTopBar
+		jal drawLives
+		jal shiftFrog
 		jal drawFrog	# Re-draw Frog If Not Hitted
 
 		li $v0, 32
-		la $a0, 200
+		la $a0, 100
 		syscall		# Sleep
 
 		j movement	# Repeat the Procedure
@@ -128,6 +153,7 @@
 		sw $ra, 0($sp)
 
 		jal drawFrame
+		jal drawTopBar
 		jal drawSafeZone
 		jal drawGoalZone
 		jal drawWaterRoad
@@ -136,6 +162,28 @@
 		lw $ra, 0($sp)
 		addi $sp, $sp, 4
 		jr $ra
+
+################## Draw Top Bar ##############################
+	drawTopBar:
+		lw $t0, basePoint
+		lw $t1, topBarColor
+		add $t2, $zero, $zero
+		add $t3, $zero, $zero
+
+		addi $t0, $t0, 520
+	drawTopBarLoop:
+		beq $t2, 60, drawTopBarEnd
+		sw $t1, 0($t0)
+		sw $t1, 256($t0)
+		sw $t1, 512($t0)
+		sw $t1, 768($t0)
+		sw $t1, 1024($t0)
+		addi $t2, $t2, 1
+		addi $t0, $t0, 4
+		j drawTopBarLoop
+	drawTopBarEnd:
+		jr $ra
+
 
 ################## Draw Frame #################################
 
@@ -203,19 +251,14 @@
 
 	drawSafeZone:
 		lw $t0, basePoint
-		addi $t0, $t0, 520
+		addi $t0, $t0, 1800
 		lw $t1, safeZoneColor
 		add $t2, $zero, $zero
 
 		addi $sp, $sp, -4
 		sw $ra, 0($sp)
 
-		jal safeZoneLoop
-
-		lw $t0, basePoint
-		addi $t0, $t0, 1800
-		add $t2, $zero, $zero
-		jal safeZoneLoop  #Top safe zone
+		jal safeZoneLoop  #Top Safe Zone
 
 
 		lw $t0, basePoint
@@ -345,6 +388,40 @@
 	waterRoadEnd:
 		jr $ra
 
+############### Draw Lives ##################
+	drawLives:
+		lw $t0, basePoint
+		lw $t1, frogColor
+		addi $t2, $zero, 520
+		add $t0, $t0, $t2
+		addi $t0, $t0, -14720
+
+		lw $t2, flags($zero)
+
+		addi $t3, $zero, 3
+		sub $t2, $t3, $t2
+		add $t3, $zero, $zero
+
+		add $t4, $zero, $zero
+	drawLivesLoop:
+		beq $t3, $t2, drawLiveEnd
+	drawSingleLife:
+		beq $t4, 64, drawSingleLifeEnd
+		lw $t5, frogShapeOri($t4)
+		addi $t4, $t4, 4
+		add $t5, $t5, $t0
+		sw $t1, 0($t5)
+		j drawSingleLife
+
+	drawSingleLifeEnd:
+		add $t4, $zero, $zero
+		addi $t3, $t3, 1
+		addi $t0, $t0, 24
+		j drawLivesLoop
+	drawLiveEnd:
+		jr $ra
+
+
 ################ Draw Frog ##################
 	drawFrog:
 		lw $t0, basePoint
@@ -390,16 +467,16 @@
 
 		jal saveLogsRow		# Log1 in Line1
 
-		addi $t2, $zero, 20
-		addi $t0, $t0, 28
+		addi $t2, $zero, 15
+		addi $t0, $t0, 24
 		jal saveLogsRow	 	# Log2 in Line1
 
-		addi $t2, $zero, 10
-		addi $t0, $t0, 8
+		addi $t2, $zero, 15
+		addi $t0, $t0, 20
 		jal saveLogsRow		# Log3 in Line1
 
 		addi $t2, $zero, 10
-		addi $t0, $t0, 24
+		addi $t0, $t0, 16
 		jal saveLogsRow		# Log4 in Line 1
 
 
@@ -407,8 +484,8 @@
 		addi $t0, $zero, 5900
 		jal saveLogsRow		# Log1 in Line2
 
-		addi $t2, $zero, 10
-		addi $t0, $t0, 28
+		addi $t2, $zero, 15
+		addi $t0, $t0, 24
 		jal saveLogsRow		# Log2 in Line2
 
 		addi $t2, $zero, 20
@@ -486,7 +563,7 @@
 ################ Save Cars #####################
 
 	saveCars:
-		addi $t0, $zero, 10804
+		addi $t0, $zero, 10760
 		add $t1, $zero, $zero
 		add $t2, $zero, $zero
 		add $t3, $zero, $zero
@@ -497,22 +574,19 @@
 
 		jal saveCarsRow 	#First car of line 1
 
-		addi $t0, $t0, 24
+		addi $t0, $t0, 52
 		jal saveCarsRow
 
-		addi $t0, $t0, 44
+		addi $t0, $t0, 52
 		jal saveCarsRow
 
-		addi $t0, $t0, 32
+		addi $t0, $zero, 13364
 		jal saveCarsRow
 
-		addi $t0, $zero, 13340
+		addi $t0, $t0, 56
 		jal saveCarsRow
 
-		addi $t0, $t0, 48
-		jal saveCarsRow
-
-		addi $t0, $t0, 72
+		addi $t0, $t0, 56
 		jal saveCarsRow
 
 		lw $ra, 0($sp)
@@ -592,7 +666,7 @@
 		jr $ra
 
 	paintCarsLoop:
-		beq $t2, 7, paintCarsEnd
+		beq $t2, 6, paintCarsEnd
 
 	paintSingleCar:
 		beq $t3, 88, paintSingleCarEnd
@@ -644,10 +718,10 @@
 		addi $t0, $zero, 4744
 		jal saveTursLoop
 
-		addi $t0, $zero, 7224
+		addi $t0, $zero, 7244
 		jal saveTursLoop
 
-		addi $t0, $zero, 7344
+		addi $t0, $zero, 7364
 		jal saveTursLoop
 
 		lw $ra, 0($sp)
@@ -755,16 +829,13 @@
 
 		jal saveTruckTail
 
-		addi $t0, $t0, 32
+		addi $t0, $t0, 72
 		jal saveTruckTail
 
-		addi $t0, $t0, 48
+		add $t0, $zero, 12088
 		jal saveTruckTail
 
-		add $t0, $zero, 12080
-		jal saveTruckTail
-
-		addi $t0, $t0, 112
+		addi $t0, $t0, 72
 		jal saveTruckTail
 
 		lw $ra, 0($sp)
@@ -845,7 +916,7 @@
 		add $t3, $zero, $zero
 
 	paintTrucksLoop:
-		beq $t2, 1020, paintTrucksEnd
+		beq $t2, 816, paintTrucksEnd
 		lw $t3, truckShape($t2)
 		add $t3, $t3, $t0
 		sw $t1, 0($t3)
@@ -892,7 +963,7 @@
 		addi $t2, $zero, 256
 
 	shiftCarsLoop:
-		beq $t1, 616, shiftLogsEnd
+		beq $t1, 528, shiftLogsEnd
 		lw $t0, carShape($t1)
 
 		rem $t3, $t0, $t2
@@ -951,7 +1022,7 @@
 		addi $t2, $zero, 256
 
 	shiftTrucksLoop:
-		beq $t1, 1020, shiftTrucksEnd
+		beq $t1, 816, shiftTrucksEnd
 		lw $t0, truckShape($t1)
 
 		rem $t3, $t0, $t2
@@ -1107,14 +1178,23 @@
 		lw $t2, safeZoneColor
 		add $t3, $zero, $zero
 		add $t0, $t0, $t1
+		add $t5, $zero, $zero
 
 	frogGoalCollisionLoop:
-		beq $t3, 5, frogGoalOccupied
+		beq $t3, 5, countGoal
 		lw $t4, 0($t0)
-		beq $t2, $t4, frogHitted
+		beq $t4, $t2, addGoal
 		addi $t3, $t3, 1
 		addi $t0, $t0, 4
 		j frogGoalCollisionLoop
+	addGoal:
+		addi $t5, $t5, 1
+		addi $t3, $t3, 1
+		j frogGoalCollisionLoop
+	countGoal:
+		slti, $t5, $t5, 3
+		beq, $t5, 1, frogGoalOccupied
+		j frogHitted
 
 
 ################# Frog Goal Occupied ##############
@@ -1145,18 +1225,15 @@
 		j frogGoalTaken
 	frogGoalTaken:
 		sw $t6, flags($t7)
-		li $v0, 1
-		move $a0, $t7
-		syscall
-		j frogNotHitted
+		j startOver
 ################ Frog Hitted ###################
 	frogHitted:
 		addi $t5, $zero, 1
 		lw $t7, flags($zero)
-		addi $7, $7, 1
+		addi $t7, $t7, 1
 		sw $t7, flags($zero)
 
-		beq $7, 3, endOfGame
+		beq $t7, 3, endOfGame
 		jr $ra
 	frogNotHitted:
 		add $t5, $zero, $zero
@@ -1175,7 +1252,160 @@
 	startOverEnd:
 		j refreshFrog
 
+############### Shift Frog ###################
+	shiftFrog:
+		lw $t0, frogShape($zero)
+	frogOverMid:
+		slti $t2, $t0, 8200
+		beq $t2, 1, frogBelowGoal
+		jr $ra
+	frogBelowGoal:
+		sgt, $t2, $t0, 3060
+		beq $t2, 1, logOrTur
+		jr $ra
+
+	logOrTur:
+		addi $t2, $zero, 256
+		div $t0, $t2
+		mflo $t3
+
+	log1:
+		beq $t3, 12, moveWithLog
+	tur1:
+		beq $t3, 17, moveWithTur
+	log2:
+		beq $t3, 22, moveWithLog
+	tur2:
+		beq $t3, 27, moveWithTur
+
+
+
+	moveWithLog:
+		add $t2, $zero, $zero
+	moveWithLogLoop:
+		beq $t2, 64, shiftFrogEnd
+		lw $t3, frogShape($t2)
+		addi $t3, $t3, 4
+		sw $t3, frogShape($t2)
+		addi $t2, $t2, 4
+		j moveWithLogLoop
+
+	moveWithTur:
+		add $t2, $zero, $zero
+	moveWithTurLoop:
+		beq $t2, 64, shiftFrogEnd
+		lw $t3, frogShape($t2)
+		addi $t3, $t3, -4
+		sw $t3, frogShape($t2)
+		addi $t2, $t2, 4
+
+		j moveWithTurLoop
+	shiftFrogEnd:
+		jr $ra
+
+
+
 ################ End of Game #################
 	endOfGame:
+		jal drawLives
+		jal drawGO
 		li $v0, 10
 		syscall
+
+############### Draw Game Over ##################
+	drawGO:
+		addi $sp, $sp, -4
+		sw $ra, 0($sp)
+
+		jal drawBG
+		jal drawOMT #One More Try
+		jal drawYes
+		jal drawNo
+
+		lw $ra, 0($sp)
+		addi $sp, $sp, 4
+
+		jr $ra
+
+############### Draw One More Try #################
+	drawOMT:
+		lw $t0, basePoint
+		addi $t0, $t0, 5660
+		lw $t1, omtColor
+		add $t2, $zero, $zero
+	drawOne:
+		beq $t2, 100, drawOneEnd
+		lw $t3, One($t2)
+		add $t3, $t3, $t0
+		addi $t2, $t2, 4
+		sw $t1, 0($t3)
+		j drawOne
+	drawOneEnd:
+		add $t2, $zero, $zero
+		addi $t0, $t0, 60
+
+	drawMore:
+		beq $t2, 116, drawMoreEnd
+		lw $t3, More($t2)
+		add $t3, $t3, $t0
+		addi $t2, $t2, 4
+		sw $t1, 0($t3)
+		j drawMore
+	drawMoreEnd:
+		add $t2, $zero, $zero
+		addi $t0, $t0, 76
+
+	drawTry:
+		beq $t2, 92, drawTryEnd
+		lw $t3, Try($t2)
+		add $t3, $t3, $t0
+		addi $t2, $t2, 4
+		sw $t1, 0($t3)
+		j drawTry
+	drawTryEnd:
+		add $t2, $zero, $zero
+		addi $t0, $t0, 52
+
+	drawQM:
+		beq $t2, 24, drawQMEnd
+		lw $t3, QM($t2)
+		add $t3, $t3, $t0
+		addi $t2, $t2, 4
+		sw $t1, 0($t3)
+		j drawQM
+	drawQMEnd:
+		jr $ra
+
+################# Draw Yes/No ##############
+	drawYes:
+		lw $t0, basePoint
+		addi $t0, $t0, 10880
+		lw $t1, chosenColor
+		add $t2, $zero, $zero
+
+	drawYesLoop:
+		beq $t2, 92, drawYesEnd
+		lw $t3, Yes($t2)
+		addi $t2, $t2, 4
+		add $t3, $t3, $t0
+		sw $t1, 0($t3)
+		j drawYesLoop
+	drawYesEnd:
+		jr $ra
+
+############## Draw No ##################
+	drawNo:
+		lw $t0, basePoint
+		addi $t0, $t0, 13188
+		lw $t1, unchosenColor
+		add $t2, $zero, $zero
+	drawNoLoop:
+		beq $t2, 76, drawNoEnd
+		lw $t3, N($t2)
+		addi $t2, $t2, 4
+		add $t3, $t3, $t0
+		sw $t1, 0($t3)
+		j drawNoLoop
+	drawNoEnd:
+		jr $ra
+
