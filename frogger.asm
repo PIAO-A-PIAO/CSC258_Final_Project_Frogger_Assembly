@@ -3,7 +3,7 @@
 # CSC258H5S Fall 2021 Assembly Final Project
 # University of Toronto, St. George
 #
-# Student: Xuanyi Piao, 1005812818
+# Student:
 #
 # Bitmap Display Configuration:
 # - Unit width in pixels: 4
